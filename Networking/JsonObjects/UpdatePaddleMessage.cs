@@ -8,7 +8,7 @@ namespace Networking.JsonObjects
     public class UpdatePaddleMessage : MessagePacket
     {
         public Vector2 position;
-        public int frameTick;
+        public int tickNumber;
         public float yVelocity;
         public UpdatePaddleMessage() 
         {

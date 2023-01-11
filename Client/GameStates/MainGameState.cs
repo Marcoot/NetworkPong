@@ -1,8 +1,6 @@
 ﻿using Client.GameObjects;
-
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
-
 using Networking.JsonObjects;
 using Newtonsoft.Json;
 using System;
@@ -119,7 +117,9 @@ namespace GameStates
             {
                 myPaddle.Position -= yIncr;
                 //now, send your message:
-                message.position = myPaddle.Position;             
+                message.position = myPaddle.Position;
+                message.yVelocity = -yIncr.Y;
+                message.tickNumber = tickCounter;
                 main.SendObject(message);
                 //-------------
             }
@@ -128,12 +128,19 @@ namespace GameStates
                 myPaddle.Position += yIncr;
                 //now, send your message:
                 message.position = myPaddle.Position;
+                message.yVelocity = yIncr.Y;
+                message.tickNumber = tickCounter;
                 main.SendObject(message);
                 //-------------
             }
-            else myPaddle.Velocity = Vector2.Zero;
-
-
+            else
+            {
+                myPaddle.Velocity = Vector2.Zero;
+                message.position = myPaddle.Position;
+                message.yVelocity = 0;
+                message.tickNumber = tickCounter;
+                main.SendObject(message);
+            }
         }
 
         /// <summary>
@@ -146,7 +153,12 @@ namespace GameStates
             if (returnData.Contains("UPDATE_POS"))
             {
                 UpdatePaddleMessage msg = JsonConvert.DeserializeObject<UpdatePaddleMessage>(returnData);
-                theirPaddle.Position = msg.position;     
+                theirPaddle.Position = msg.position;
+                if (msg.tickNumber != tickCounter)
+                {
+
+                }
+
             }
         }
         //--------------------------------------------------------
