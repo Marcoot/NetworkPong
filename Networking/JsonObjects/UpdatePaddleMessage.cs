@@ -8,6 +8,8 @@ namespace Networking.JsonObjects
     public class UpdatePaddleMessage : MessagePacket
     {
         public Vector2 position;
+        public int frameTick;
+        public float yVelocity;
         public UpdatePaddleMessage() 
         {
             msgType = "UPDATE_POS";        
