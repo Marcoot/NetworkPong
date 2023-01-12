@@ -140,6 +140,7 @@ namespace GameStates
                 message.yVelocity = 0;
                 message.tickNumber = tickCounter;
                 main.SendObject(message);
+                //
             }
         }
 
@@ -205,9 +206,6 @@ namespace GameStates
         {
             
         }
-        
-        
-       
 
     }
 }
