@@ -12,16 +12,20 @@ namespace GameStates
     public class MainGameState : GameObjectList
     {
         private int myId;
+        int tickCounter = 0;
+        int enemyTickCounter;
         private Paddle leftPaddle, rightPaddle, myPaddle, theirPaddle;
         private Arrow marker;
         private Ball ball;
+
+        string enemyDirection;
 
         TextGameObject tickCounterText;
 
         UpdatePaddleMessage message;
         BaseProject.Game1 main;
-        
-        int tickCounter = 0;
+
+
         //physics:
         Vector2 yIncr = new Vector2(0, 10);
 
@@ -118,7 +122,10 @@ namespace GameStates
                 myPaddle.Position -= yIncr;
                 //now, send your message:
                 message.position = myPaddle.Position;
-                message.yVelocity = -yIncr.Y;
+
+                message.direction = "Up";
+                //message.yVelocity = yIncr.Y;
+
                 message.tickNumber = tickCounter;
                 main.SendObject(message);
                 //-------------
@@ -128,7 +135,9 @@ namespace GameStates
                 myPaddle.Position += yIncr;
                 //now, send your message:
                 message.position = myPaddle.Position;
-                message.yVelocity = yIncr.Y;
+
+                message.direction = "Down";
+                //message.yVelocity = yIncr.Y;
                 message.tickNumber = tickCounter;
                 main.SendObject(message);
                 //-------------
@@ -137,7 +146,9 @@ namespace GameStates
             {
                 myPaddle.Velocity = Vector2.Zero;
                 message.position = myPaddle.Position;
-                message.yVelocity = 0;
+
+                message.direction = "Nothing";
+                //message.yVelocity = 0;
                 message.tickNumber = tickCounter;
                 main.SendObject(message);
                 //
@@ -155,7 +166,12 @@ namespace GameStates
             {
                 UpdatePaddleMessage msg = JsonConvert.DeserializeObject<UpdatePaddleMessage>(returnData);
                 theirPaddle.Position = msg.position;
-                if (msg.tickNumber != tickCounter)
+
+                enemyTickCounter = msg.tickNumber;
+                enemyDirection = msg.direction;
+
+                //if (msg.tickNumber != tickCounter)
+                if (enemyTickCounter < tickCounter) tickDifferenceHandler();
                 {
 
                 }
@@ -195,6 +211,15 @@ namespace GameStates
 
 
             base.Update(gameTime);
+        }
+
+        public void tickDifferenceHandler()
+        {
+            int tickDifference = tickCounter - enemyTickCounter;
+
+            if (enemyDirection == "Stop") return;
+            else if (enemyDirection == "Up") theirPaddle.Position -= yIncr * tickDifference;
+            else if (enemyDirection == "Down") theirPaddle.Position += yIncr * tickDifference;
         }
 
         public override void Reset()

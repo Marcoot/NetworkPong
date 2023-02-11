@@ -9,7 +9,8 @@ namespace Networking.JsonObjects
     {
         public Vector2 position;
         public int tickNumber;
-        public float yVelocity;
+        //public float yVelocity;
+        public string direction {  get; set; }
         public UpdatePaddleMessage() 
         {
             msgType = "UPDATE_POS";        
