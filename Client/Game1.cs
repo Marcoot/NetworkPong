@@ -85,8 +85,8 @@ namespace BaseProject
             connection.SendString("CONNECT");
             state = State.Connected;
         }
-
-        public void SendObject(UpdatePaddleMessage message)
+        //changed UpdatePaddleMessage to Messagepacket to use all of the message packets instead of one
+        public void SendObject(MessagePacket message)
         {
             //4. aand start echoing 
             connection.SendObject(message);

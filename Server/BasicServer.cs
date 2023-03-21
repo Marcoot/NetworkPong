@@ -56,7 +56,11 @@ namespace Server
                 case State.Started:
                     if (returnData.Contains("UPDATE_POS"))
                         SendAllExceptPort(port, receiveBytes);
-                    //else if (etc)
+                    //more messagetypes return for no change and paddle got hit
+                    else if(returnData.Contains("NO_CHANGE"))
+                        SendAllExceptPort(port, receiveBytes);
+                    else if (returnData.Contains("PADDLE_HIT"))
+                        SendAllExceptPort(port, receiveBytes);
                     break;
             }
             

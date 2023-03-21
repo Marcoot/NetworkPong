@@ -17,12 +17,14 @@ namespace GameStates
         private Paddle leftPaddle, rightPaddle, myPaddle, theirPaddle;
         private Arrow marker;
         private Ball ball;
+        Keys lastKeyPressed;
 
         string enemyDirection;
 
         TextGameObject tickCounterText;
-
-        UpdatePaddleMessage message;
+        NoChangeMessage noChangeMessage;
+        PaddleHitMessage paddleHit;
+        UpdatePaddleMessage updateMessage;
         BaseProject.Game1 main;
 
 
@@ -55,7 +57,10 @@ namespace GameStates
             tickCounterText.Position = new Vector2(350, 30);
             Add(tickCounterText);
 
-            message = new UpdatePaddleMessage();
+            noChangeMessage = new NoChangeMessage();
+            updateMessage = new UpdatePaddleMessage();
+            paddleHit = new PaddleHitMessage();
+
         }
 
         public void StartGame(int id)
@@ -103,12 +108,41 @@ namespace GameStates
             if (ball.CollidesWith(leftPaddle) || ball.CollidesWith(rightPaddle))
             {
                 ball.BounceHorizontal();
+
+            }
+            //sends if ball hits my own paddle
+            if (ball.CollidesWith(myPaddle))
+            {
+                paddleHit.tickNumber = tickCounter;
+                paddleHit.positionPaddle = myPaddle.Position;
+
+                paddleHit.ballPosition = ball.Position;
+                paddleHit.ballVelocity = ball.Velocity;
+
+                main.SendObject(paddleHit);
             }
 
+            //MovingOppenentPaddle();
             //Update ball (nb: DON'T replace this with MonoGame's Update; messes up the determinism of frames)
             ball.Tick();
 
         }
+
+        /*public void MovingOppenentPaddle()
+        {
+            if (enemyDirection == "Up")
+            {
+                theirPaddle.Position -= yIncr;
+            }
+            else if(enemyDirection == "Down")
+            {
+                theirPaddle.Position += yIncr;
+            }
+            else if (enemyDirection == "Nothing")
+            {
+                return;
+            }
+        }*/
 
         /// <summary>
         /// Use HandleInput for all the code when 'pressing keyboard buttons'
@@ -117,41 +151,73 @@ namespace GameStates
         {
             base.HandleInput(inputHelper);
 
+            //key W
             if (inputHelper.IsKeyDown(Keys.W))
             {
                 myPaddle.Position -= yIncr;
-                //now, send your message:
-                message.position = myPaddle.Position;
 
-                message.direction = "Up";
-                //message.yVelocity = yIncr.Y;
+                if (lastKeyPressed != Keys.W)
+                {
+                    updateMessage.position = myPaddle.Position;
 
-                message.tickNumber = tickCounter;
-                main.SendObject(message);
-                //-------------
+                    updateMessage.direction = "Up";
+                    //message.yVelocity = yIncr.Y;
+
+                    updateMessage.tickNumber = tickCounter;
+                    main.SendObject(updateMessage);
+
+                    noChangeMessage.direction = "Up";
+                    lastKeyPressed = Keys.W;
+                }
+                else
+                {
+                    noChangeMessage.tickNumber = tickCounter;
+                    main.SendObject(noChangeMessage);
+                }
             }
+            //key S
             else if (inputHelper.IsKeyDown(Keys.S))
             {
                 myPaddle.Position += yIncr;
-                //now, send your message:
-                message.position = myPaddle.Position;
 
-                message.direction = "Down";
-                //message.yVelocity = yIncr.Y;
-                message.tickNumber = tickCounter;
-                main.SendObject(message);
-                //-------------
+                if (lastKeyPressed != Keys.S)
+                {
+                    myPaddle.Position += yIncr;
+                    //now, send your message:
+                    updateMessage.position = myPaddle.Position;
+
+                    updateMessage.direction = "Down";
+                    //message.yVelocity = yIncr.Y;
+                    updateMessage.tickNumber = tickCounter;
+                    main.SendObject(updateMessage);
+                }
+                else
+                {
+                    noChangeMessage.tickNumber = tickCounter;
+                    main.SendObject(noChangeMessage);
+                }
             }
+            //No keys
             else
             {
-                myPaddle.Velocity = Vector2.Zero;
-                message.position = myPaddle.Position;
+                if (lastKeyPressed != Keys.None)
+                {
+                    {
+                        myPaddle.Velocity = Vector2.Zero;
+                        updateMessage.position = myPaddle.Position;
 
-                message.direction = "Nothing";
-                //message.yVelocity = 0;
-                message.tickNumber = tickCounter;
-                main.SendObject(message);
-                //
+                        updateMessage.direction = "Nothing";
+
+                        updateMessage.tickNumber = tickCounter;
+                        main.SendObject(updateMessage);
+                        
+                    }
+                }
+                else
+                {
+                    noChangeMessage.tickNumber = tickCounter;
+                    main.SendObject(noChangeMessage);
+                }
             }
         }
 
@@ -217,6 +283,7 @@ namespace GameStates
         {
             int tickDifference = tickCounter - enemyTickCounter;
 
+            //if no movement stop, enemydirection up and down changes yIncrease * tickdifference of their position
             if (enemyDirection == "Stop") return;
             else if (enemyDirection == "Up") theirPaddle.Position -= yIncr * tickDifference;
             else if (enemyDirection == "Down") theirPaddle.Position += yIncr * tickDifference;
