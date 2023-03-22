@@ -238,10 +238,19 @@ namespace GameStates
 
                 //if (msg.tickNumber != tickCounter)
                 if (enemyTickCounter < tickCounter) tickDifferenceHandler();
-                {
+            }
+            if (returnData.Contains("NO_CHANGE"))
+            {
+                NoChangeMessage msg = JsonConvert.DeserializeObject<NoChangeMessage>(returnData);
+                enemyTickCounter= msg.tickNumber;
+                enemyDirection = msg.direction;
 
-                }
-
+                if (enemyTickCounter < tickCounter) tickDifferenceHandler();
+            }
+            if (returnData.Contains("PADDLE_HIT"))
+            {
+                PaddleHitMessage msg = JsonConvert.DeserializeObject<PaddleHitMessage>(returnData);
+                
             }
         }
         //--------------------------------------------------------

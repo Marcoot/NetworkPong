@@ -15,6 +15,7 @@ namespace Networking.JsonObjects
 
         public PaddleHitMessage()
         {
+            //messagetype
             msgType = "PADDLE_HIT";
         }
     }
