@@ -128,22 +128,6 @@ namespace GameStates
 
         }
 
-        /*public void MovingOppenentPaddle()
-        {
-            if (enemyDirection == "Up")
-            {
-                theirPaddle.Position -= yIncr;
-            }
-            else if(enemyDirection == "Down")
-            {
-                theirPaddle.Position += yIncr;
-            }
-            else if (enemyDirection == "Nothing")
-            {
-                return;
-            }
-        }*/
-
         /// <summary>
         /// Use HandleInput for all the code when 'pressing keyboard buttons'
         /// </summary>
@@ -155,7 +139,7 @@ namespace GameStates
             if (inputHelper.IsKeyDown(Keys.W))
             {
                 myPaddle.Position -= yIncr;
-
+                //if still holding key W
                 if (lastKeyPressed != Keys.W)
                 {
                     updateMessage.position = myPaddle.Position;
@@ -250,7 +234,13 @@ namespace GameStates
             if (returnData.Contains("PADDLE_HIT"))
             {
                 PaddleHitMessage msg = JsonConvert.DeserializeObject<PaddleHitMessage>(returnData);
-                
+
+                ball.x = (int)msg.ballPosition.X;
+                ball.y = (int)msg.ballPosition.Y;
+
+                ball.vx = (int)msg.ballVelocity.X;
+                ball.vy = (int)msg.ballVelocity.Y;
+               if (enemyTickCounter < tickCounter) tickDifferenceHandler();
             }
         }
         //--------------------------------------------------------
