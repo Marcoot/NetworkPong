@@ -20,6 +20,7 @@ namespace GameStates
         Keys lastKeyPressed;
 
         string enemyDirection;
+        string lastDirection;
 
         TextGameObject tickCounterText;
         NoChangeMessage noChangeMessage;
@@ -221,7 +222,7 @@ namespace GameStates
                 enemyDirection = msg.direction;
 
                 //if (msg.tickNumber != tickCounter)
-                if (enemyTickCounter < tickCounter) tickDifferenceHandler();
+                if (enemyTickCounter < tickCounter) TickDifferenceHandler();
             }
             if (returnData.Contains("NO_CHANGE"))
             {
@@ -229,7 +230,7 @@ namespace GameStates
                 enemyTickCounter= msg.tickNumber;
                 enemyDirection = msg.direction;
 
-                if (enemyTickCounter < tickCounter) tickDifferenceHandler();
+                if (enemyTickCounter < tickCounter) TickDifferenceHandler();
             }
             if (returnData.Contains("PADDLE_HIT"))
             {
@@ -240,7 +241,7 @@ namespace GameStates
 
                 ball.vx = (int)msg.ballVelocity.X;
                 ball.vy = (int)msg.ballVelocity.Y;
-               if (enemyTickCounter < tickCounter) tickDifferenceHandler();
+                if (enemyTickCounter < tickCounter) BallTickDifference();
             }
         }
         //--------------------------------------------------------
@@ -278,14 +279,24 @@ namespace GameStates
             base.Update(gameTime);
         }
 
-        public void tickDifferenceHandler()
+        //berekend verschil ticks van beiden clienten, de functie gaat dat compenseren 
+        public void TickDifferenceHandler()
         {
             int tickDifference = tickCounter - enemyTickCounter;
 
-            //if no movement stop, enemydirection up and down changes yIncrease * tickdifference of their position
-            if (enemyDirection == "Stop") return;
-            else if (enemyDirection == "Up") theirPaddle.Position -= yIncr * tickDifference;
-            else if (enemyDirection == "Down") theirPaddle.Position += yIncr * tickDifference;
+            //if no movement stop, enemydirection up or down changes yIncrease * tickdifference of their position
+            if (lastDirection == "Stop") return;
+            else if (lastDirection == "Up") theirPaddle.Position -= yIncr * tickDifference;
+            else if (lastDirection == "Down") theirPaddle.Position += yIncr * tickDifference;
+        }
+
+        public void BallTickDifference()
+        {
+            int tickDifference = tickCounter - enemyTickCounter;
+            for(int i = 0; i < tickDifference; i++)
+            {
+                ball.Tick();
+            }
         }
 
         public override void Reset()
